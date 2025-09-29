@@ -1,0 +1,42 @@
+id: 66d31063-7456-49d3-a98d-b0f4aabd72bf
+name: Convert to FullWidth
+function: CUSTOM_ACTION
+location: REPEATER
+source: |+
+  /**
+  * Convert selected request text to full-width chars and copy it to clipboard
+  *
+  * @author Amos
+  **/
+  
+  if (selection == null || !selection.hasRequestSelection() ) {
+      logging.logToOutput("Aucune sélection trouvée dans la requête.");
+      return;
+  }
+  
+  String selectedText = selection.requestSelection().contents().toString();
+  StringBuilder converted = new StringBuilder();
+  
+  for (char c : selectedText.toCharArray()) {
+      if (c >= 33 && c <= 126) {
+          // ASCII visible -> Full-width
+          converted.append((char)(c + 0xFEE0));
+      } else if (c == ' ') {
+          converted.append('\u3000'); // Full-width space
+      } else {
+          // Laisser les caractères non convertibles
+          converted.append(c);
+      }
+  }
+  
+  String result = converted.toString();
+  
+  // Copier dans le presse-papiers
+  try {
+      var clipboard = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
+      var selectionObj = new java.awt.datatransfer.StringSelection(result);
+      clipboard.setContents(selectionObj, null);
+      logging.logToOutput("Texte full-width (copié dans le presse-papiers) :\n" + result);
+  } catch (Exception e) {
+      logging.logToOutput("Texte full-width (non copié dans le presse-papiers) :\n" + result);
+  }

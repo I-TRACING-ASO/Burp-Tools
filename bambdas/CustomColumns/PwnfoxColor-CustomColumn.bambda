@@ -1,0 +1,67 @@
+id: 0c06bc38-5905-47b6-b2da-4bc276364225
+name: PwnfoxColor
+function: CUSTOM_COLUMN
+location: PROXY_HTTP_HISTORY
+source: |+
+  class IconCache {
+      static final Map<String, javax.swing.ImageIcon> icons = new HashMap<>();
+      static final Map<String, String> labels = Map.of(
+          "blue", "Compte 1",
+          "cyan", "Compte 2",
+          "green", "Compte 3",
+          "yellow", "Compte 4",
+          "orange", "Compte 5",
+          "red", "Compte 6",
+          "pink", "Compte 7",
+          "magenta", "Compte 8"
+      );
+  }
+  
+  String colorStr = requestResponse.request().headerValue("X-Pwnfox-Color");
+  if (colorStr == null || colorStr.isBlank()) {
+      return "";
+  }
+  
+  colorStr = colorStr.toLowerCase();
+  
+  // Cache : image déjà générée ?
+  if (IconCache.icons.containsKey(colorStr)) {
+      return IconCache.icons.get(colorStr);
+  }
+  
+  // Déterminer la couleur de fond
+  java.awt.Color color = switch (colorStr) {
+      case "blue" -> java.awt.Color.BLUE;
+      case "cyan" -> java.awt.Color.CYAN;
+      case "green" -> java.awt.Color.GREEN;
+      case "yellow" -> java.awt.Color.YELLOW;
+      case "orange" -> java.awt.Color.ORANGE;
+      case "red" -> java.awt.Color.RED;
+      case "pink" -> java.awt.Color.PINK;
+      case "magenta" -> java.awt.Color.MAGENTA;
+      default -> java.awt.Color.LIGHT_GRAY;
+  };
+  
+  // Déterminer le texte à afficher
+  String label = IconCache.labels.getOrDefault(colorStr, "");
+  
+  // Générer l’image
+  int width = 100;
+  int height = 20;
+  java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
+  java.awt.Graphics2D g = image.createGraphics();
+  g.setColor(color);
+  g.fillRect(0, 0, width, height);
+  
+  // Couleur du texte : blanc si fond sombre
+  int brightness = (color.getRed()*299 + color.getGreen()*587 + color.getBlue()*114) / 1000;
+  g.setColor(brightness < 128 ? java.awt.Color.WHITE : java.awt.Color.BLACK);
+  
+  g.setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 12));
+  g.drawString(label, 5, 15);
+  g.dispose();
+  
+  // Stocker et renvoyer
+  javax.swing.ImageIcon icon = new javax.swing.ImageIcon(image);
+  IconCache.icons.put(colorStr, icon);
+  return icon;

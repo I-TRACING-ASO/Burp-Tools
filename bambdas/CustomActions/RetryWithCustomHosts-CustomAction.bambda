@@ -1,0 +1,48 @@
+id: fcb22e28-1da5-4b44-bedb-8f363af2c7a8
+name: Retry request with custom Hosts
+function: CUSTOM_ACTION
+location: REPEATER
+source: |+
+    /**
+    * Retry request with custom hosts
+    *
+    * @author Amos
+    **/
+
+    var req = requestResponse.request();
+    var originalHost = req.headerValue("Host").split(":")[0];
+    var collaborator = api.collaborator().defaultPayloadGenerator().generatePayload().toString();
+    var hosts = new String[] {
+        "localhost", "127.0.0.1", "[::1]", "192.168.1.1", "itr-af.com", collaborator
+    };
+
+    var local_ports = new String[] {
+        "80", "443", "8080", "8443", "3000", "4200", "5000", "5001", "8000", "8888", "9000", "9090"
+    };
+
+    var ports = new String[] {
+        "80", "443"
+    };
+
+    for (String host : hosts) {
+        boolean isLocal = !(host.equals("itr-af.com") || host.equals(collaborator));
+        
+        // Juste host sans port
+        var resp1 = api().http().sendRequest(req.withUpdatedHeader("Host", host)).response();
+        logging().logToOutput("Host: " + host + " - " + resp1.statusCode());
+
+        if (isLocal) {
+            for (String port : local_ports) {
+                String hostHeader = host + ":" + port;
+                var resp = api().http().sendRequest(req.withUpdatedHeader("Host", hostHeader)).response();
+                logging().logToOutput("Host: " + hostHeader + " - " + resp.statusCode());
+            }
+        } else {
+            // Avec ports 80 et 443
+            for (String port : ports) {
+                String hostHeader = host + ":" + port;
+                var resp = api().http().sendRequest(req.withUpdatedHeader("Host", hostHeader)).response();
+                logging().logToOutput("Host: " + hostHeader + " - " + resp.statusCode());
+            }
+        }
+    }
