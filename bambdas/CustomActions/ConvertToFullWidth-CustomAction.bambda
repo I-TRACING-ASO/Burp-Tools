@@ -6,11 +6,11 @@ source: |+
   /**
   * Convert selected request text to full-width chars and copy it to clipboard
   *
-  * @author Amos
+  * @author Amos George
   **/
   
   if (selection == null || !selection.hasRequestSelection() ) {
-      logging.logToOutput("Aucune sélection trouvée dans la requête.");
+      logging.logToOutput("No text selection in request");
       return;
   }
   
@@ -19,24 +19,25 @@ source: |+
   
   for (char c : selectedText.toCharArray()) {
       if (c >= 33 && c <= 126) {
-          // ASCII visible -> Full-width
+          // Visible ASCII to Full-width chars
           converted.append((char)(c + 0xFEE0));
       } else if (c == ' ') {
           converted.append('\u3000'); // Full-width space
       } else {
-          // Laisser les caractères non convertibles
+          // Do not edit non-visible chars
           converted.append(c);
       }
   }
   
   String result = converted.toString();
   
-  // Copier dans le presse-papiers
+  // Copy to clipboard
   try {
       var clipboard = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
       var selectionObj = new java.awt.datatransfer.StringSelection(result);
       clipboard.setContents(selectionObj, null);
-      logging.logToOutput("Texte full-width (copié dans le presse-papiers) :\n" + result);
+      logging.logToOutput("Full-width text copied:\n" + result);
   } catch (Exception e) {
-      logging.logToOutput("Texte full-width (non copié dans le presse-papiers) :\n" + result);
+      logging.logToOutput("Failed to copy full-width text:\n" + result);
   }
+
