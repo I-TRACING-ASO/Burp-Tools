@@ -6,14 +6,14 @@ source: |+
     /**
     * Retry request with custom hosts
     *
-    * @author Amos
+    * @author Amos George
     **/
 
     var req = requestResponse.request();
     var originalHost = req.headerValue("Host").split(":")[0];
     var collaborator = api.collaborator().defaultPayloadGenerator().generatePayload().toString();
     var hosts = new String[] {
-        "localhost", "127.0.0.1", "[::1]", "192.168.1.1", "itr-af.com", collaborator
+        "localhost", "127.0.0.1", "[::1]", "192.168.1.1", collaborator
     };
 
     var local_ports = new String[] {
@@ -25,9 +25,9 @@ source: |+
     };
 
     for (String host : hosts) {
-        boolean isLocal = !(host.equals("itr-af.com") || host.equals(collaborator));
+        boolean isLocal = !(host.equals(collaborator));
         
-        // Juste host sans port
+        // Only host, without port
         var resp1 = api().http().sendRequest(req.withUpdatedHeader("Host", host)).response();
         logging().logToOutput("Host: " + host + " - " + resp1.statusCode());
 
@@ -38,7 +38,7 @@ source: |+
                 logging().logToOutput("Host: " + hostHeader + " - " + resp.statusCode());
             }
         } else {
-            // Avec ports 80 et 443
+            // With ports 80 and 443
             for (String port : ports) {
                 String hostHeader = host + ":" + port;
                 var resp = api().http().sendRequest(req.withUpdatedHeader("Host", hostHeader)).response();
