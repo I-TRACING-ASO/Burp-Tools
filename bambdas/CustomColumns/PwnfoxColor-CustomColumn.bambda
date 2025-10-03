@@ -3,17 +3,23 @@ name: PwnfoxColor
 function: CUSTOM_COLUMN
 location: PROXY_HTTP_HISTORY
 source: |+
+    /**
+    * Add colored column with PwnFox color (and account name, if set in IconCache.labels Map)
+    *
+    * @author Amos George
+    **/
+
   class IconCache {
       static final Map<String, javax.swing.ImageIcon> icons = new HashMap<>();
       static final Map<String, String> labels = Map.of(
-          "blue", "Compte 1",
-          "cyan", "Compte 2",
-          "green", "Compte 3",
-          "yellow", "Compte 4",
-          "orange", "Compte 5",
-          "red", "Compte 6",
-          "pink", "Compte 7",
-          "magenta", "Compte 8"
+          "blue", "Account 1",
+          "cyan", "Account 2",
+          "green", "Account 3",
+          "yellow", "Account 4",
+          "orange", "Account 5",
+          "red", "Account 6",
+          "pink", "Account 7",
+          "magenta", "Account 8"
       );
   }
   
@@ -24,12 +30,12 @@ source: |+
   
   colorStr = colorStr.toLowerCase();
   
-  // Cache : image déjà générée ?
+  // Cache: check if ImageIcon is already set
   if (IconCache.icons.containsKey(colorStr)) {
       return IconCache.icons.get(colorStr);
   }
   
-  // Déterminer la couleur de fond
+  // Define background color
   java.awt.Color color = switch (colorStr) {
       case "blue" -> java.awt.Color.BLUE;
       case "cyan" -> java.awt.Color.CYAN;
@@ -42,10 +48,9 @@ source: |+
       default -> java.awt.Color.LIGHT_GRAY;
   };
   
-  // Déterminer le texte à afficher
   String label = IconCache.labels.getOrDefault(colorStr, "");
   
-  // Générer l’image
+  // Create image
   int width = 100;
   int height = 20;
   java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
@@ -53,7 +58,7 @@ source: |+
   g.setColor(color);
   g.fillRect(0, 0, width, height);
   
-  // Couleur du texte : blanc si fond sombre
+  //Text color: white if dark label color
   int brightness = (color.getRed()*299 + color.getGreen()*587 + color.getBlue()*114) / 1000;
   g.setColor(brightness < 128 ? java.awt.Color.WHITE : java.awt.Color.BLACK);
   
@@ -61,7 +66,8 @@ source: |+
   g.drawString(label, 5, 15);
   g.dispose();
   
-  // Stocker et renvoyer
+  // Store and return ImageIcon
   javax.swing.ImageIcon icon = new javax.swing.ImageIcon(image);
   IconCache.icons.put(colorStr, icon);
   return icon;
+
